@@ -35,6 +35,8 @@ public class Test {
             }
         });
         //测试jdk动态代理生成代理类
+        //参考 https://stackoverflow.com/questions/4409456/how-to-unwrap-the-original-object-from-a-dynamic-proxy
+
         InvocationHandler invocationHandler = Proxy.getInvocationHandler(proxy);
         Field f = invocationHandler.getClass().getDeclaredField("val$hello");
         f.setAccessible(true);
