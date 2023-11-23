@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 
 /**
  * Rpc请求处理者，解组请求,编组响应
+ *
  * @author zhuyusheng
  * @date 2022/1/11
  */
@@ -28,29 +29,29 @@ public class RequestHandler {
 
     private ServiceRegistry serviceRegistry;
 
-    public byte[] handRequest(byte[] reqData) throws Exception{
+    public byte[] handRequest(byte[] reqData) throws Exception {
         //1.解组消息
         RpcRequest rpcRequest = this.protocol.unmarshallRequest(reqData);
-        logger.debug("RpcRequest:{}",rpcRequest);
+        logger.debug("RpcRequest:{}", rpcRequest);
         //2.获取对应的服务元数据
         ServiceMetaData serviceMetaData = serviceRegistry.getServiceMetaData(rpcRequest.getServiceName());
         RpcResponse response = null;
-        if(null == serviceMetaData){
+        if (null == serviceMetaData) {
             response = new RpcResponse(RpcStatusEnum.NOT_FOUND);
-        }else{
+        } else {
             try {
                 //3.反射调用方法
-                Method method = serviceMetaData.getClazz().getMethod(rpcRequest.getMethodName(),rpcRequest.getParameterTypes());
+                Method method = serviceMetaData.getClazz().getMethod(rpcRequest.getMethodName(), rpcRequest.getParameterTypes());
                 Object returnVal = method.invoke(serviceMetaData.getObj(), rpcRequest.getParameters());
                 response = new RpcResponse(RpcStatusEnum.SUCCESS);
                 response.setData(returnVal);
-            }catch (Exception e){
+            } catch (Exception e) {
                 response = new RpcResponse(RpcStatusEnum.ERROR);
                 response.setException(e);
             }
         }
         response.setRequestId(rpcRequest.getRequestId());
-        logger.debug("RpcResponse:{}",response);
+        logger.debug("RpcResponse:{}", response);
         //4.编组响应并返回
         return this.protocol.marshallingResponse(response);
     }

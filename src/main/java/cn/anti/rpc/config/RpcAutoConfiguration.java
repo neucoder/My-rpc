@@ -28,6 +28,7 @@ import java.util.ServiceLoader;
 
 /**
  * Rpc自动配置类,注入需要使用的Bean
+ *
  * @author zhuyusheng
  * @date 2022/1/11
  */
@@ -36,34 +37,34 @@ import java.util.ServiceLoader;
 public class RpcAutoConfiguration {
 
     @Bean
-    public RpcConfig rpcConfig(){
+    public RpcConfig rpcConfig() {
         return new RpcConfig();
     }
 
     @Bean
-    public ServiceRegistry serviceRegistry(@Autowired RpcConfig rpcConfig){
-        switch (rpcConfig.getRegisterType()){
+    public ServiceRegistry serviceRegistry(@Autowired RpcConfig rpcConfig) {
+        switch (rpcConfig.getRegisterType()) {
             case "zk":
-                return new ZookeeperRegistry(rpcConfig.getAddress(),rpcConfig.getServerPort(),rpcConfig.getProtocol(),rpcConfig.getWeight());
+                return new ZookeeperRegistry(rpcConfig.getAddress(), rpcConfig.getServerPort(), rpcConfig.getProtocol(), rpcConfig.getWeight());
             case "nacos":
-                return new NacosRegistry(rpcConfig.getAddress(),rpcConfig.getServerPort(),rpcConfig.getProtocol(),rpcConfig.getWeight());
+                return new NacosRegistry(rpcConfig.getAddress(), rpcConfig.getServerPort(), rpcConfig.getProtocol(), rpcConfig.getWeight());
             default:
                 throw new RpcException("invalid register type config!");
         }
     }
 
     @Bean
-    public RequestHandler requestHandler(@Autowired ServiceRegistry serviceRegistry,@Autowired RpcConfig rpcConfig){
-        return new RequestHandler(getProtocol(rpcConfig.getProtocol()),serviceRegistry);
+    public RequestHandler requestHandler(@Autowired ServiceRegistry serviceRegistry, @Autowired RpcConfig rpcConfig) {
+        return new RequestHandler(getProtocol(rpcConfig.getProtocol()), serviceRegistry);
     }
 
     @Bean
-    public NettyServer rpcServer(@Autowired RpcConfig rpcConfig, @Autowired RequestHandler requestHandler){
-        return new NettyNettyServer(rpcConfig.getServerPort(),rpcConfig.getProtocol(),requestHandler);
+    public NettyServer rpcServer(@Autowired RpcConfig rpcConfig, @Autowired RequestHandler requestHandler) {
+        return new NettyNettyServer(rpcConfig.getServerPort(), rpcConfig.getProtocol(), requestHandler);
     }
 
     @Bean
-    public ClientProxyFactory proxyFactory(@Autowired ServiceRegistry serviceRegistry,@Autowired RpcConfig rpcConfig){
+    public ClientProxyFactory proxyFactory(@Autowired ServiceRegistry serviceRegistry, @Autowired RpcConfig rpcConfig) {
         //1.新建客户端代理工厂
         ClientProxyFactory clientProxyFactory = new ClientProxyFactory();
         //2.设置服务发现者
@@ -80,17 +81,18 @@ public class RpcAutoConfiguration {
 
     /**
      * 使用spi返回符合配置的序列化算法
+     *
      * @param name
      * @return
      */
-    private SerializeProtocol getProtocol(String name){
+    private SerializeProtocol getProtocol(String name) {
         ServiceLoader<SerializeProtocol> loader = ServiceLoader.load(SerializeProtocol.class);
         Iterator<SerializeProtocol> iterator = loader.iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             SerializeProtocol serializeProtocol = iterator.next();
             SerializeProtocolAno annotation = serializeProtocol.getClass().getAnnotation(SerializeProtocolAno.class);
             Assert.notNull(annotation, "serialize protocol can not be empty!");
-            if(name.equals(annotation.value())){
+            if (name.equals(annotation.value())) {
                 return serializeProtocol;
             }
         }
@@ -99,34 +101,36 @@ public class RpcAutoConfiguration {
 
     /**
      * 使用spi返回所有支持的序列化算法
+     *
      * @return
      */
-    private Map<String,SerializeProtocol> getSupportProtocol(){
-        Map<String,SerializeProtocol> supportProtocolMap = new HashMap<>();
+    private Map<String, SerializeProtocol> getSupportProtocol() {
+        Map<String, SerializeProtocol> supportProtocolMap = new HashMap<>();
         ServiceLoader<SerializeProtocol> load = ServiceLoader.load(SerializeProtocol.class);
         Iterator<SerializeProtocol> iterator = load.iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             SerializeProtocol serializeProtocol = iterator.next();
             SerializeProtocolAno annotation = serializeProtocol.getClass().getAnnotation(SerializeProtocolAno.class);
             Assert.notNull(annotation, "serialize protocol can not be empty!");
-            supportProtocolMap.put(annotation.value(),serializeProtocol);
+            supportProtocolMap.put(annotation.value(), serializeProtocol);
         }
         return supportProtocolMap;
     }
 
     /**
      * 使用spi匹配符合配置的负载均衡算法
+     *
      * @param name
      * @return
      */
-    private LoadBalance getLoadBalance(String name){
+    private LoadBalance getLoadBalance(String name) {
         ServiceLoader<LoadBalance> load = ServiceLoader.load(LoadBalance.class);
         Iterator<LoadBalance> iterator = load.iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             LoadBalance loadBalance = iterator.next();
             LoadBalanceAno annotation = loadBalance.getClass().getAnnotation(LoadBalanceAno.class);
-            Assert.notNull(annotation,"load balance can not be empty!");
-            if(name.equals(annotation.value())){
+            Assert.notNull(annotation, "load balance can not be empty!");
+            if (name.equals(annotation.value())) {
                 return loadBalance;
             }
         }
@@ -136,7 +140,7 @@ public class RpcAutoConfiguration {
     @Bean
     public RpcStarter rpcStarter(@Autowired ClientProxyFactory clientProxyFactory,
                                  @Autowired ServiceRegistry serviceRegistry,
-                                   @Autowired NettyServer nettyServer) {
+                                 @Autowired NettyServer nettyServer) {
         return new RpcStarter(clientProxyFactory, serviceRegistry, nettyServer);
     }
 }

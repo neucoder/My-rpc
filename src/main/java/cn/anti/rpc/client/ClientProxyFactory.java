@@ -23,6 +23,7 @@ import java.util.UUID;
 /**
  * 客户端代理工厂:创建远程服务代理类
  * 封装编组请求、发送请求、编组响应
+ *
  * @author zhuyusheng
  * @date 2022/1/14
  */
@@ -37,20 +38,20 @@ public class ClientProxyFactory {
 
     private Map<String, SerializeProtocol> protocolMap;
 
-    private Map<Class<?>,Object> objectCache = new HashMap<>();
+    private Map<Class<?>, Object> objectCache = new HashMap<>();
 
     private LoadBalance loadBalance;
 
-    public <T> T getProxy(Class<T> clazz){
-        return (T) objectCache.computeIfAbsent(clazz,clz ->
-                Proxy.newProxyInstance(clz.getClassLoader(),new Class[]{clz},new ClientInvocationHandler(clz)));
+    public <T> T getProxy(Class<T> clazz) {
+        return (T) objectCache.computeIfAbsent(clazz, clz ->
+                Proxy.newProxyInstance(clz.getClassLoader(), new Class[]{clz}, new ClientInvocationHandler(clz)));
     }
 
-    private class ClientInvocationHandler implements InvocationHandler{
+    private class ClientInvocationHandler implements InvocationHandler {
 
         private Class<?> clazz;
 
-        public ClientInvocationHandler(Class<?> clazz){
+        public ClientInvocationHandler(Class<?> clazz) {
             this.clazz = clazz;
         }
 
@@ -78,12 +79,12 @@ public class ClientProxyFactory {
             //3.协议层编组
             SerializeProtocol serializeProtocol = protocolMap.get(serviceUrl.getProtocol());
             //4.发送请求
-            logger.debug("NetClient:{}",netClient.toString());
-            logger.debug("RpcRequest:{}",rpcRequest.toString());
-            logger.debug("ServiceUrl:{}",serviceUrl.toString());
-            logger.debug("SerializeProtocol:{}",serializeProtocol.toString());
+            logger.debug("NetClient:{}", netClient.toString());
+            logger.debug("RpcRequest:{}", rpcRequest.toString());
+            logger.debug("ServiceUrl:{}", serviceUrl.toString());
+            logger.debug("SerializeProtocol:{}", serializeProtocol.toString());
             RpcResponse response = netClient.sendRequest(rpcRequest, serviceUrl, serializeProtocol);
-            if (response == null){
+            if (response == null) {
                 throw new RpcException("the response is null");
             }
             if (response.getException() != null) {

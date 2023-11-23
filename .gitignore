@@ -65,3 +65,9 @@
 /rpc_client/.mvn/wrapper/maven-wrapper.jar
 /rpc_server/.mvn/wrapper/maven-wrapper.jar
 /rpc_server/.mvn/wrapper/maven-wrapper.properties
+/rpc_client/.mvn/wrapper/maven-wrapper.jar
+/rpc_server/.mvn/wrapper/maven-wrapper.jar
+/demo/.mvn/wrapper/maven-wrapper.jar
+/demo/.mvn/wrapper/maven-wrapper.properties
+/demo/.mvn/wrapper/maven-wrapper.jar
+/.idea/gradle.xml
